@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EMI Calculator</title>
+    <link rel="stylesheet" href="emi-calculator.css" />
+  </head>
+  <body>
+    <h1 class="page-header">EMI Calculator</h1>
+    <div class="container">
+      <section id="emi_inputs" class="mb-3">
+        <div class="form-control">
+          <label for="pAmt">Principal Amount</label>
+          <input type="number" id="pAmt" disabled="disabled" value="10000" />
+        </div>
+        <div class="form-control">
+          <label for="iRate">Annual Interest Rate (p.a.)</label>
+          <input type="number" id="iRate" disabled="disabled" value="16" />
+        </div>
+        <div class="form-control">
+          <label for="lTenure">Loan Tenure</label>
+          <input type="number" id="lTenure" disabled="disabled" value="3" />
+        </div>
+        <div class="form-control">
+          <input type="checkbox" id="calcGst" checked="checked" />
+          <label for="calcGst">Calculate GST on Interest</label>
+        </div>
+        <div class="button-bar">
+          <button class="btn" id="btn_calc_emi" disabled="disabled">
+            Calculate EMI
+          </button>
+        </div>
+      </section>
+  
+      <section id="emi_break_up" class="mb-3">
+        <table class="mb-3 spaced">
+          <tbody>
+            <tr>
+              <td>EMI amount per month</td>
+              <td id="emiAmt" class="ff-mono"></td>
+            </tr>
+            <tr>
+              <td>Total interest to be paid</td>
+              <td id="totalInt" class="ff-mono"></td>
+            </tr>
+          </tbody>
+        </table>
+  
+        <table id="emi-break-up-table" class="bordered spaced">
+          <thead>
+            <tr>
+              <th>Principal Paid</th>
+              <th>Interest Paid</th>
+              <th>GST on Interest</th>
+              <th>Total Payable</th>
+              <th>Remaining Principal</th>
+            </tr>
+          </thead>
+          <tbody id="emi_break_up_tbl_body"></tbody>
+        </table>
+      </section>
+    </div>
+
+    <script>
+      function byId(id) {
+        return document.getElementById(id);
+      }
+      function enable(id) {
+        const elem = byId(id);
+        if (elem) {
+          elem.removeAttribute("disabled");
+        }
+      }
+      function pAmt() {
+        return +byId("pAmt").value;
+      }
+      function iRate() {
+        return +byId("iRate").value;
+      }
+      function lTenure() {
+        return +byId("lTenure").value;
+      }
+      function isCalcGstChecked() {
+        return byId("calcGst").checked;
+      }
+      function fmtNum(num) {
+        if (!isNaN(num)) {
+          return num.toFixed(2);
+        }
+        return num;
+      }
+
+      (function emiCalculator() {
+        function onLoad() {
+          ["pAmt", "iRate", "lTenure", "btn_calc_emi"].forEach((id) =>
+            enable(id)
+          );
+        }
+
+        function calcEmi(p, n, r) {
+          return (p * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+        }
+
+        onLoad();
+
+        function tr() {
+          let tr = document.createElement("tr");
+          tr.td = function (val) {
+            const td = document.createElement("td");
+            td.innerHTML = val;
+            this.appendChild(td);
+            return this;
+          };
+          return tr;
+        }
+
+        function onCalcEmi(evt) {
+          const p = pAmt();
+          const n = lTenure();
+          const r = iRate() / 1200;
+          const isCalcGst = isCalcGstChecked();
+
+          if (isNaN(p) || isNaN(n) || isNaN(r)) {
+            return;
+          }
+
+          const emi = calcEmi(p, n, r);
+          byId("emiAmt").innerHTML = fmtNum(emi);
+          byId("totalInt").innerHTML = fmtNum(emi * n - p);
+
+          tbody = byId("emi_break_up_tbl_body");
+          tbody.innerHTML = "";
+
+          let remp = p; // remaining principal
+          for (let i = 0; i < n; i++) {
+            const int = remp * r; // interest paid with emi
+            const pp = emi - int; // principal paid with emi
+            const gstOnInt = isCalcGst ? int * 0.18 : 0;
+            remp -= pp;
+            tbody.appendChild(
+              tr()
+                .td(fmtNum(pp))
+                .td(fmtNum(int))
+                .td(fmtNum(gstOnInt))
+                .td(fmtNum(emi + gstOnInt))
+                .td(fmtNum(remp))
+            );
+          }
+        }
+
+        byId("btn_calc_emi").addEventListener("click", onCalcEmi);
+        byId("btn_calc_emi").click();
+      })();
+    </script>
+  </body>
+</html>
