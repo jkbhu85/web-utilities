@@ -11,27 +11,30 @@
     <h1 class="page-header">EMI Calculator</h1>
     <div class="container">
       <section id="emi_inputs" class="mb-3">
-        <div class="form-control">
-          <label for="pAmt">Principal Amount</label>
-          <input type="number" id="pAmt" disabled="disabled" value="10000" />
-        </div>
-        <div class="form-control">
-          <label for="iRate">Annual Interest Rate (p.a.)</label>
-          <input type="number" id="iRate" disabled="disabled" value="16" />
-        </div>
-        <div class="form-control">
-          <label for="lTenure">Loan Tenure</label>
-          <input type="number" id="lTenure" disabled="disabled" value="3" />
-        </div>
-        <div class="form-control">
-          <input type="checkbox" id="calcGst" checked="checked" />
-          <label for="calcGst">Calculate GST on Interest</label>
-        </div>
-        <div class="button-bar">
-          <button class="btn" id="btn_calc_emi" disabled="disabled">
-            Calculate EMI
-          </button>
-        </div>
+        <form>
+          <div class="form-control">
+            <label for="pAmt">Principal Amount</label>
+            <input type="number" id="pAmt" disabled="disabled" value="" />
+          </div>
+          <div class="form-control">
+            <label for="iRate">Annual Interest Rate (p.a.)</label>
+            <input type="number" id="iRate" disabled="disabled" value="" />
+          </div>
+          <div class="form-control">
+            <label for="lTenure">Loan Tenure</label>
+            <input type="number" id="lTenure" disabled="disabled" value="" />
+          </div>
+          <div class="form-control">
+            <input type="checkbox" id="calcGst" checked="checked" />
+            <label for="calcGst">Calculate GST on Interest</label>
+          </div>
+          <div class="button-bar">
+            <button type="button" class="btn" id="btn_calc_emi" disabled="disabled">
+              Calculate EMI
+            </button>
+            <button type="reset" class="btn">Reset</button>
+          </div>
+        </form>
       </section>
   
       <section id="emi_break_up" class="mb-3">
@@ -97,6 +100,9 @@
           ["pAmt", "iRate", "lTenure", "btn_calc_emi"].forEach((id) =>
             enable(id)
           );
+          byId('pAmt').value = '10000';
+          byId('iRate').value = '16';
+          byId('lTenure').value = '3';
         }
 
         function calcEmi(p, n, r) {
@@ -122,7 +128,7 @@
           const r = iRate() / 1200;
           const isCalcGst = isCalcGstChecked();
 
-          if (isNaN(p) || isNaN(n) || isNaN(r)) {
+          if (isNaN(p) || isNaN(n) || isNaN(r) || p == 0 || n == 0 || r == 0) {
             return;
           }
 
