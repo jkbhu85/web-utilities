@@ -13,47 +13,94 @@
       <section id="emi_inputs" class="mb-3">
         <form>
           <div class="form-control">
-            <label for="pAmt">Principal Amount</label>
-            <input type="number" id="pAmt" disabled="disabled" value="" />
+            <label class="label" for="pAmt">Principal Amount</label>
+            <input type="number" id="pAmt" disabled value="" />
           </div>
           <div class="form-control">
-            <label for="iRate">Annual Interest Rate (p.a.)</label>
-            <input type="number" id="iRate" disabled="disabled" value="" />
+            <label class="label" for="iRate">Interest Rate</label>
+            <input type="number" id="iRate" disabled value="" />
+          </div>
+          <div class="form-control related">
+            <div class="label"></div>
+            <div class="radio-group" style="display: inline-block">
+              <input
+                type="radio"
+                id="iRateMonthly"
+                name="iRatePeriod"
+                disabled
+                checked
+              />
+              <label for="iRateMonthly">Monthly</label>
+              <input
+                type="radio"
+                id="iRateYearly"
+                name="iRatePeriod"
+                disabled
+              />
+              <label for="iRateYearly">Yearly</label>
+            </div>
           </div>
           <div class="form-control">
-            <label for="lTenure">Loan Tenure</label>
-            <input type="number" id="lTenure" disabled="disabled" value="" />
+            <label class="label" for="lTenure">Loan Tenure</label>
+            <input type="number" id="lTenure" disabled value="" />
+          </div>
+          <div class="form-control related">
+            <div class="label"></div>
+            <div class="radio-group" style="display: inline-block">
+              <input
+                type="radio"
+                id="lTenureMonths"
+                name="lTenureDuration"
+                disabled
+                checked
+              />
+              <label for="lTenureMonths">Months</label>
+              <input
+                type="radio"
+                id="lTenureYears"
+                name="lTenureDuration"
+                disabled
+              />
+              <label for="lTenureYears">Years</label>
+            </div>
           </div>
           <div class="form-control">
-            <input type="checkbox" id="calcGst" checked="checked" />
-            <label for="calcGst">Calculate GST on Interest</label>
+            <label class="label" for="calcTax">Calculate Tax on Interest</label>
+            <input type="checkbox" id="calcTax" disabled />
+          </div>
+          <div class="form-control related">
+            <label class="label" for="taxRateOnInterest">Tax rate</label>
+            <input type="number" id="taxRateOnInterest" disabled />
           </div>
           <div class="button-bar">
-            <button type="button" class="btn" id="btn_calc_emi" disabled="disabled">
+            <button type="button" class="btn" id="btnCalcEmi" disabled>
               Calculate EMI
             </button>
             <button type="reset" class="btn">Reset</button>
           </div>
         </form>
       </section>
-  
-      <section id="emi_break_up" class="mb-3">
+
+      <section id="emiBreakUp" class="mb-3">
         <table class="mb-3 spaced">
           <tbody>
             <tr>
               <td>EMI amount per month</td>
+              <td>:</td>
               <td id="emiAmt" class="ff-mono"></td>
             </tr>
             <tr>
               <td>Total interest to be paid</td>
+              <td>:</td>
               <td id="totalInt" class="ff-mono"></td>
             </tr>
           </tbody>
         </table>
-  
-        <table id="emi-break-up-table" class="bordered spaced">
+
+        <table id="emiBreakUpTbl" class="bordered spaced">
           <thead>
             <tr>
+              <th>EMI No.</th>
               <th>Principal Paid</th>
               <th>Interest Paid</th>
               <th>GST on Interest</th>
@@ -61,7 +108,7 @@
               <th>Remaining Principal</th>
             </tr>
           </thead>
-          <tbody id="emi_break_up_tbl_body"></tbody>
+          <tbody id="emiBreakUpTblBody"></tbody>
         </table>
       </section>
     </div>
@@ -82,11 +129,20 @@
       function iRate() {
         return +byId("iRate").value;
       }
+      function isRatePerMonth() {
+        return byId("iRateMonthly").checked;
+      }
       function lTenure() {
         return +byId("lTenure").value;
       }
-      function isCalcGstChecked() {
-        return byId("calcGst").checked;
+      function taxRateOnInterest() {
+        return +byId("taxRateOnInterest").value;
+      }
+      function isTenureMontly() {
+        return byId("lTenureMonths").checked;
+      }
+      function isCalcTaxChecked() {
+        return byId("calcTax").checked;
       }
       function fmtNum(num) {
         if (!isNaN(num)) {
@@ -97,67 +153,137 @@
 
       (function emiCalculator() {
         function onLoad() {
-          ["pAmt", "iRate", "lTenure", "btn_calc_emi"].forEach((id) =>
-            enable(id)
-          );
-          byId('pAmt').value = '10000';
-          byId('iRate').value = '16';
-          byId('lTenure').value = '3';
+          [
+            "pAmt",
+            "iRate",
+            "iRateMonthly",
+            "iRateYearly",
+            "lTenure",
+            "lTenureMonths",
+            "lTenureYears",
+            "calcTax",
+            "btnCalcEmi",
+          ].forEach((id) => enable(id));
+          byId("pAmt").value = "10000";
+          byId("iRate").value = "1.6";
+          byId("lTenure").value = "3";
+          byId("taxRateOnInterest").value = "18";
         }
 
         function calcEmi(p, n, r) {
           return (p * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
         }
 
-        onLoad();
-
         function tr() {
           let tr = document.createElement("tr");
-          tr.td = function (val) {
+          tr.td = function _td(val) {
             const td = document.createElement("td");
             td.innerHTML = val;
             this.appendChild(td);
+            return this;
+          };
+          tr.th = function _th(val) {
+            const th = document.createElement("th");
+            th.innerHTML = val;
+            this.appendChild(th);
             return this;
           };
           return tr;
         }
 
         function onCalcEmi(evt) {
-          const p = pAmt();
-          const n = lTenure();
-          const r = iRate() / 1200;
-          const isCalcGst = isCalcGstChecked();
+          const isCalcTaxOnInterest = isCalcTaxChecked();
 
-          if (isNaN(p) || isNaN(n) || isNaN(r) || p == 0 || n == 0 || r == 0) {
+          const taxRate = taxRateOnInterest();
+          if (isCalcTaxOnInterest && (isNaN(taxRate) || taxRate == 0)) {
+            alert("Tax rate is invalid.");
             return;
           }
 
-          const emi = calcEmi(p, n, r);
+          const principal = pAmt();
+          const n = lTenure() * (isTenureMontly() ? 1 : 12);
+          const r = iRate() / (isRatePerMonth() ? 100 : 1200);
+
+          if (
+            isNaN(principal) ||
+            isNaN(n) ||
+            isNaN(r) ||
+            principal == 0 ||
+            n == 0 ||
+            r == 0
+          ) {
+            return;
+          }
+
+          const emi = calcEmi(principal, n, r);
           byId("emiAmt").innerHTML = fmtNum(emi);
-          byId("totalInt").innerHTML = fmtNum(emi * n - p);
+          byId("totalInt").innerHTML = fmtNum(emi * n - principal);
 
-          tbody = byId("emi_break_up_tbl_body");
-          tbody.innerHTML = "";
+          const table = byId("emiBreakUpTbl");
+          table.innerHTML = "";
+          const headers = [
+            "EMI No.",
+            "Principal Paid",
+            "Interest Paid",
+            "Total Payable",
+            "Remaining Principal",
+          ];
 
-          let remp = p; // remaining principal
+          if (isCalcTaxOnInterest) {
+            headers.splice(3, 0, "Tax on Interest");
+          }
+
+          const trHeader = tr();
+          for (let h of headers) {
+            trHeader.th(h);
+          }
+          const thead = document.createElement("thead");
+          thead.appendChild(trHeader);
+          table.appendChild(thead);
+
+          const tbody = document.createElement("tbody");
+          table.appendChild(tbody);
+
+          let remainingPrincipal = principal;
           for (let i = 0; i < n; i++) {
-            const int = remp * r; // interest paid with emi
-            const pp = emi - int; // principal paid with emi
-            const gstOnInt = isCalcGst ? int * 0.18 : 0;
-            remp -= pp;
-            tbody.appendChild(
-              tr()
-                .td(fmtNum(pp))
-                .td(fmtNum(int))
-                .td(fmtNum(gstOnInt))
-                .td(fmtNum(emi + gstOnInt))
-                .td(fmtNum(remp))
-            );
+            const interestPaid = remainingPrincipal * r; // interest paid with emi
+            const principalPaid = emi - interestPaid; // principal paid with emi
+            const taxOnInterest = isCalcTaxOnInterest ? interestPaid * (taxRate / 100) : 0;
+            remainingPrincipal -= principalPaid;
+            if (remainingPrincipal <= 0.01) {
+              remainingPrincipal = 0;
+            }
+
+            const trElem = tr()
+              .td(i + 1)
+              .td(fmtNum(principalPaid))
+              .td(fmtNum(interestPaid));
+
+            if (isCalcTaxOnInterest) {
+              trElem.td(fmtNum(taxOnInterest));
+            }
+
+            trElem
+              .td(fmtNum(emi + taxOnInterest))
+              .td(fmtNum(remainingPrincipal));
+
+            tbody.appendChild(trElem);
           }
         }
 
-        byId("btn_calc_emi").addEventListener("click", onCalcEmi);
-        byId("btn_calc_emi").click();
+        function calcGstChangeHandler(e) {
+          const taxRateInput = byId("taxRateOnInterest");
+          if (isCalcTaxChecked()) {
+            taxRateInput.removeAttribute("disabled");
+          } else {
+            taxRateInput.setAttribute("disabled", "");
+          }
+        }
+
+        onLoad();
+        byId("calcTax").addEventListener("change", calcGstChangeHandler);
+        byId("btnCalcEmi").addEventListener("click", onCalcEmi);
+        byId("btnCalcEmi").click();
       })();
     </script>
   </body>
