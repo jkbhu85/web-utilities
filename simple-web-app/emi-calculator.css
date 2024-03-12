@@ -6,6 +6,7 @@ body {
   font-family: var(--ff);
   color: #373737;
   margin: 0;
+  background: #f3f3f3;
 }
 input,
 select,
@@ -91,11 +92,35 @@ table.bordered {
 }
 table.bordered th,
 table.bordered td {
-  border: 1px solid #d7d7d7;
+  border: 1px solid #e4e4e4;
 }
 #emiBreakUpTbl td {
   text-align: right;
   font-family: var(--mf);
+}
+.jk-key-value-container {
+  display: flex;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+.jk-key-value {
+  background: rgba(0,0,0,.03);
+  border-radius: .25rem;
+  padding: 1rem;
+  flex-grow: 1;
+}
+.jk-key {
+  font-weight: 500;
+  font-size: 1.125rem;
+  margin: 0;
+  margin-bottom: .5rem;
+  padding: 0;
+  color: #666;
+}
+.jk-value {
+  margin: 0;
+  padding: 0;
 }
 
 @media only screen and (min-width: 701px) and (max-width: 1000px) {
